@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: ranch
+    version: latest
+    environment: staging
+  name: ranch
+  namespace: ranch
+spec:
+  replicas: 3
+  strategy:
+   type: RollingUpdate
+   rollingUpdate:
+     maxSurge: 10
+     maxUnavailable: 2
+  selector:
+    matchLabels:
+     app: ranch
+     version: latest
+  template:
+    metadata:
+      labels:
+        app: ranch
+        version: latest
+        environment: staging
+      annotations:
+        sumologic.com/format: "json"
+        sumologic.com/sourceCategory: "ranch/container"
+        sumologic.com/sourceName: "ranch_container"
+    spec:
+      containers:
+      - name: ranch
+        image: makerbot/ranch:master
+        imagePullPolicy: Always
+        env:
+          - name: NODE_ENV
+            value: staging
+          - name: AWS_REGION
+            value: 'us-east-1'
+        ports:
+         - containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+      imagePullSecrets:
+        - name: dockerhub

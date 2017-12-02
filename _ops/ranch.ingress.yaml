@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ranch-tls
+  namespace: ranch
+  annotations:
+    proxy-body-size: "0"
+    kubernetes.io/tls-acme: "true"
+    ingress.kubernetes.io/enable-cors: "true"
+    dns.alpha.kubernetes.io/external: "true"
+spec:
+  tls:
+  - hosts:
+    - ranch-staging.makerbot.com
+    secretName: ranch-makerbot-com-tls
+  - hosts:
+    - ranch.makerbot.com
+    secretName: ranch-prod-makerbot-com-tls
+  rules:
+  - host: ranch.makerbot.com
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: ranch-svc
+            servicePort: 80
+  - host: ranch-staging.makerbot.com
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: ranch-svc
+            servicePort: 80

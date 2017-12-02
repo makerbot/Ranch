@@ -1,0 +1,30 @@
+apiVersion: v1
+items:
+- apiVersion: autoscaling/v1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    annotations:
+      autoscaling.alpha.kubernetes.io/conditions: '[{"type":"AbleToScale","status":"True","lastTransitionTime":"2017-09-20T19:51:25Z","reason":"ReadyForNewScale","message":"the
+        last scale time was sufficiently old as to warrant a new scale"},{"type":"ScalingActive","status":"True","lastTransitionTime":"2017-09-20T19:54:25Z","reason":"ValidMetricFound","message":"the
+        HPA was able to succesfully calculate a replica count from cpu resource utilization
+        (percentage of request)"},{"type":"ScalingLimited","status":"True","lastTransitionTime":"2017-09-20T19:54:25Z","reason":"TooFewReplicas","message":"the
+        desired replica count was less than the minimum replica count"}]'
+      autoscaling.alpha.kubernetes.io/current-metrics: '[{"type":"Resource","resource":{"name":"cpu","currentAverageUtilization":2,"currentAverageValue":"2m"}}]'
+    name: ranch
+    namespace: ranch
+  spec:
+    maxReplicas: 12
+    minReplicas: 3
+    scaleTargetRef:
+      apiVersion: extensions/v1beta1
+      kind: Deployment
+      name: ranch
+    targetCPUUtilizationPercentage: 50
+  status:
+    currentCPUUtilizationPercentage: 2
+    currentReplicas: 3
+    desiredReplicas: 3
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

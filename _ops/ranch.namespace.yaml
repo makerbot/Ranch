@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ranch
+  annotations:
+    iam.amazonaws.com/allowed-roles: |
+      ["arn:aws:iam::617275767683:role/nodes.ranch.makerdev.nl"]
