@@ -9,7 +9,7 @@ WORKDIR /app
 
 CMD ["python3", "examples/html-form/server.py"]
 
-COPY requirements.txt runtime.txt .
+COPY requirements.txt runtime.txt ./
 RUN pip3 install -r requirements.txt
 
 COPY . /app
