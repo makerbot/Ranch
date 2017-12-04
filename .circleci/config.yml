@@ -80,7 +80,7 @@ jobs:
 
 workflows:
   version: 2
-  test_build_push:
+  build_push:
     jobs:
       - build
       - push:
