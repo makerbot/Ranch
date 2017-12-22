@@ -72,7 +72,7 @@ jobs:
               echo Tagging $tag
               docker tag $IMAGE_NAME $tag
             }
-					 # Push tag name, or branch name if tag doesn't exist (CircleCI runs tags/branches separately)
+
             tag_image "${CIRCLE_TAG:-$CIRCLE_BRANCH}"
             tag_image $SHORT_COMMIT
             [ -n "$CIRCLE_TAG" ] && tag_image rc-$SHORT_COMMIT
