@@ -72,12 +72,13 @@ jobs:
               echo Tagging $tag
               docker tag $IMAGE_NAME $tag
             }
-
-            tag_image $CIRCLE_BRANCH
-            tag_image `git rev-parse --short HEAD` # short commit id
+					 # Push tag name, or branch name if tag doesn't exist (CircleCI runs tags/branches separately)
+            tag_image "${CIRCLE_TAG:-$CIRCLE_BRANCH}"
+            tag_image $SHORT_COMMIT
+            [ -n "$CIRCLE_TAG" ] && tag_image rc-$SHORT_COMMIT
+            [ $CIRCLE_BRANCH == "staging" ] && tag_image stg-$SHORT_COMMIT
             docker login -u $DOCKER_USERNAME -p $DOCKER_SECURE_PASS
             docker push $IMAGE_NAME_ORG
-
 workflows:
   version: 2
   build_push:
