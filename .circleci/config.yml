@@ -1,0 +1,89 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: docker:stable-git
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - restore_cache:
+          keys:
+            - image-cache-{{ .Branch }}
+            - image-cache-
+          paths:
+            - /caches/ranch.tar
+
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            if [ -f "/caches/ranch.tar" ]; then
+              docker load -i /caches/ranch.tar
+            fi
+
+      - run:
+          name: Build Docker container
+          command: docker build --cache-from=ranch -t ranch .
+
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/ranch.tar ranch
+
+      - save_cache:
+          key: image-cache-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/ranch.tar
+
+  push:
+    docker:
+      - image: docker:stable-git
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - restore_cache:
+          keys:
+            - image-cache-{{ .Branch }}
+          paths:
+            - /caches/ranch.tar
+
+      - run:
+          name: Load Docker image layer cache
+          command: docker load -i /caches/ranch.tar
+
+      - deploy:
+          name: Push Docker containers
+          command: |
+            IMAGE_NAME="ranch"
+            IMAGE_NAME_ORG="makerbot/$IMAGE_NAME"
+
+            tag_image () {
+              local tag="$IMAGE_NAME_ORG:$1"
+              echo Tagging $tag
+              docker tag $IMAGE_NAME $tag
+            }
+
+            tag_image $CIRCLE_BRANCH
+            tag_image `git rev-parse --short HEAD` # short commit id
+            docker login -u $DOCKER_USERNAME -p $DOCKER_SECURE_PASS
+            docker push $IMAGE_NAME_ORG
+
+workflows:
+  version: 2
+  build_push:
+    jobs:
+      - build
+      - push:
+          requires:
+            - build
+          context: org-global
